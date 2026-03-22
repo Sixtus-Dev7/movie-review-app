@@ -2,7 +2,7 @@ const url = new URL(location.href);
 const movieId = url.searchParams.get("id");
 const movieTitle = url.searchParams.get("title");
 
-const APILINK = "https://movie-review-app-1-g5e8.onrender.com";
+const API_URL = "https://movie-review-app.onrender.com/api/v1/reviews";
 
 const formSection = document.getElementById("form-section");
 const reviewsSection = document.getElementById("reviews-section");
