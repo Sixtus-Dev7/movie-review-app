@@ -3,6 +3,9 @@ import cors from "cors";
 import reviews from "./api/reviews.route.js";
 const app = express();
 const PORT = process.env.PORT || 8000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 app.use(cors());
 app.use(express.json);
