@@ -39,13 +39,14 @@ if (!mongoURI) {
 app.use("/api/v1/reviews", reviews);
 
 app.get("/api", (req, res) => {
-  res.send("API is working 🚀");
+  res.send("API is working ");
 });
 
 //  SERVES FRONTEND (SAFE FOR API)
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-app.get("*", (req, res) => {
+// CATCH ALL
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
