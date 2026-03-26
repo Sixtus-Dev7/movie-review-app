@@ -8,9 +8,10 @@ const formSection = document.getElementById("form-section");
 const reviewsSection = document.getElementById("reviews-section");
 const title = document.getElementById("title");
 
-title.innerText = movieTitle;
+title.innerText = movieTitle || "Movie Title";
 
 
+// 🔹 Create New Review Form
 function createNewReviewForm() {
     const div = document.createElement('div');
     div.innerHTML = `
@@ -33,9 +34,7 @@ function createNewReviewForm() {
 }
 
 
-returnReviews(APILINK);
-
-
+// 🔹 Load Reviews
 function returnReviews(url) {
     reviewsSection.innerHTML = ""; 
     
@@ -43,7 +42,7 @@ function returnReviews(url) {
         formSection.appendChild(createNewReviewForm());
     }
 
-    fetch(url + "movie/" + movieId, { cache: "no-store" })
+    fetch(url + "/movie/" + movieId, { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
             console.log("Fetched Reviews:", data);
@@ -77,7 +76,6 @@ function returnReviews(url) {
                 `;
                 reviewsSection.appendChild(div_card);
 
-                
                 div_card.querySelector(".edit-btn").addEventListener("click", function() {
                     editReview(this.dataset.id, this.dataset.review, this.dataset.user);
                 });
@@ -87,6 +85,7 @@ function returnReviews(url) {
 }
 
 
+// 🔹 Edit Review
 function editReview(id, review, user) {
     const element = document.getElementById(id);
     const reviewInputId = "review" + id;
@@ -104,9 +103,8 @@ function editReview(id, review, user) {
 }
 
 
+// 🔹 Save Review (POST / PUT)
 function saveReview(reviewInputId, userInputId, id = "") {
-    console.log("Clicked Save");
-
     const reviewEl = document.getElementById(reviewInputId);
     const userEl = document.getElementById(userInputId);
 
@@ -123,7 +121,7 @@ function saveReview(reviewInputId, userInputId, id = "") {
         return;
     }
 
-    const url = id ? APILINK + id : APILINK + "new";
+    const url = id ? API_URL + "/" + id : API_URL + "/new";
     const method = id ? "PUT" : "POST";
 
     fetch(url, {
@@ -136,20 +134,25 @@ function saveReview(reviewInputId, userInputId, id = "") {
     .then(res => res.json())
     .then(res => {
         console.log("Saved:", res);
-        returnReviews(APILINK); 
+        returnReviews(API_URL); 
     })
     .catch(err => console.error("Error saving review:", err));
 }
 
 
+// 🔹 Delete Review
 function deleteReview(id) {
     if (!confirm("Are you sure you want to delete this review?")) return;
 
-    fetch(APILINK + id, { method: "DELETE" })
+    fetch(API_URL + "/" + id, { method: "DELETE" })
         .then(res => res.json())
         .then(res => {
             console.log("Deleted:", res);
-            returnReviews(APILINK); 
+            returnReviews(API_URL); 
         })
         .catch(err => console.error("Error deleting review:", err));
 }
+
+
+// 🔹 INITIAL LOAD
+returnReviews(API_URL);
