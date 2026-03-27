@@ -6,53 +6,45 @@ import cors from "cors";
 import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import reviews from "./api/reviews.route.js";
+import ReviewsDAO from "./dao/reviewsDAO.js";
 
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type"]
-}));
-
+app.use(cors()); // will restrict later if needed
 app.use(express.json());
 
-//  DEBUG ENV (to remove later if its not needed)
-console.log("ENV:", process.env.DATABASE_URL);
-
-//  MONGODB CONNECTION (SAFE CHECK)
 const mongoURI = process.env.DATABASE_URL;
 
-if (!mongoURI) {
-  console.error(" DATABASE_URL is missing in .env");
-} else {
-  mongoose.connect(mongoURI)
-    .then(() => console.log(" Database connected"))
-    .catch(err => console.error(" DB connection error:", err));
-}
+// CONNECTION
+mongoose.connect(mongoURI)
+  .then(async (conn) => {
+    console.log("Database connected");
 
-//  API ROUTES
+    await ReviewsDAO.injectDB(conn);
+  })
+  .catch(err => console.error("DB connection error:", err));
+
+// ROUTES
 app.use("/api/v1/reviews", reviews);
 
 app.get("/api", (req, res) => {
-  res.send("API is working ");
+  res.send("API is working 🚀");
 });
 
-//  SERVES FRONTEND (SAFE FOR API)
+// SERVE FRONTEND
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// CATCH ALL
-app.use((req, res) => {
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
-//  START SERVER
 const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
-  console.log(` Server running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });

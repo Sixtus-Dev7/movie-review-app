@@ -1,77 +1,72 @@
-import mongodb from "mongodb"
-const ObjectId = mongodb.ObjectId
+import mongodb from "mongodb";
+const ObjectId = mongodb.ObjectId;
 
-let reviews
+let reviews;
 
 export default class ReviewsDAO {
+
   static async injectDB(conn) {
-    if (reviews) {
-      return
-    }
+    if (reviews) return;
+
     try {
-      reviews = await conn.db("reviews").collection("reviews")
+      reviews = await conn.connection.db.collection("reviews");
     } catch (e) {
-      console.error(`Unable to establish collection handles in userDAO: ${e}`)
+      console.error(`Unable to connect: ${e}`);
     }
   }
+
   static async addReview(movieId, user, review) {
     try {
-      const reviewDoc = {
-        movieId: movieId,
-        user: user,
-        review: review,
+      const doc = {
+        movieId: movieId.toString(),
+        user,
+        review,
         date: new Date()
-      }
+      };
 
-      return await reviews.insertOne(reviewDoc)
-
+      return await reviews.insertOne(doc);
     } catch (e) {
-      console.error(`Unable to post review: ${e}`)
-      return { error: e}
-    }
-  }
-  static async getReview(reviewId) {
-    try {
-      return await reviews.findOne({ _id: new ObjectId(reviewId) })
-    } catch (e) {
-      console.error(`Unable to get review: ${e}`)
-      return { error: e }
+      return { error: e };
     }
   }
 
-  static async updateReview(reviewId, user, review) {
+  static async getReview(id) {
     try {
-      const updateResponse = await reviews.updateOne(
-        { _id: new ObjectId(reviewId) },
-        { $set: { user: user, review: review } }
-      )
-
-      return updateResponse
+      return await reviews.findOne({ _id: new ObjectId(id) });
     } catch (e) {
-      console.error(`Unable to update review: ${e}`)
-      return {error: e }
+      return { error: e };
     }
   }
 
-  static async deleteReview(reviewId) {
+  static async updateReview(id, user, review) {
     try {
-      const deleteResponse = await reviews.deleteOne({
-        _id: new ObjectId(reviewId),
-      })
-
-      return deleteResponse
+      return await reviews.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { user, review } }
+      );
     } catch (e) {
-      console.error(`Unable to delete review: ${e}`)
-      return { error: e }
+      return { error: e };
+    }
+  }
+
+  static async deleteReview(id) {
+    try {
+      return await reviews.deleteOne({
+        _id: new ObjectId(id)
+      });
+    } catch (e) {
+      return { error: e };
     }
   }
 
   static async getReviewsByMovieId(movieId) {
     try {
-      const cursor = await reviews.find({ movieId: movieId.toString() })
-      return cursor.toArray()
+      return await reviews
+        .find({ movieId: movieId.toString() })
+        .toArray();
     } catch (e) {
-      console.error(`Unable to get review: ${e}`)
+      console.error(e);
+      return [];
     }
   }
 }

@@ -2,7 +2,7 @@ const url = new URL(location.href);
 const movieId = url.searchParams.get("id");
 const movieTitle = url.searchParams.get("title");
 
-const API_URL = "https://movie-review-app.onrender.com/api/v1/reviews";
+const API_URL = "https://movie-review-app.onrender.com/api/v1/reviews"
 
 const formSection = document.getElementById("form-section");
 const reviewsSection = document.getElementById("reviews-section");
@@ -11,7 +11,7 @@ const title = document.getElementById("title");
 title.innerText = movieTitle || "Movie Title";
 
 
-// 🔹 Create New Review Form
+// Create New Review Formcon
 function createNewReviewForm() {
     const div = document.createElement('div');
     div.innerHTML = `
@@ -34,7 +34,7 @@ function createNewReviewForm() {
 }
 
 
-// 🔹 Load Reviews
+// Load Reviews
 function returnReviews(url) {
     reviewsSection.innerHTML = ""; 
     
@@ -85,7 +85,7 @@ function returnReviews(url) {
 }
 
 
-// 🔹 Edit Review
+// Edit Review
 function editReview(id, review, user) {
     const element = document.getElementById(id);
     const reviewInputId = "review" + id;
@@ -103,7 +103,7 @@ function editReview(id, review, user) {
 }
 
 
-// 🔹 Save Review (POST / PUT)
+// Save Review (POST / PUT)
 function saveReview(reviewInputId, userInputId, id = "") {
     const reviewEl = document.getElementById(reviewInputId);
     const userEl = document.getElementById(userInputId);
@@ -140,7 +140,7 @@ function saveReview(reviewInputId, userInputId, id = "") {
 }
 
 
-// 🔹 Delete Review
+// Delete Review
 function deleteReview(id) {
     if (!confirm("Are you sure you want to delete this review?")) return;
 
@@ -154,5 +154,5 @@ function deleteReview(id) {
 }
 
 
-// 🔹 INITIAL LOAD
+// INITIAL LOAD
 returnReviews(API_URL);
