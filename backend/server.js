@@ -15,8 +15,8 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors()); // will restrict later if needed
-app.use(express.json());
+  app.use(cors()); // will restrict later if needed
+  app.use(express.json());
 
 const mongoURI = process.env.DATABASE_URL;
 
@@ -33,7 +33,7 @@ mongoose.connect(mongoURI)
 app.use("/api/v1/reviews", reviews);
 
 app.get("/api", (req, res) => {
-  res.send("API is working 🚀");
+  res.send("API is working ");
 });
 
 // SERVE FRONTEND
