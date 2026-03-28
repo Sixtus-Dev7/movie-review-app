@@ -2,7 +2,7 @@ const url = new URL(location.href);
 const movieId = url.searchParams.get("id");
 const movieTitle = url.searchParams.get("title");
 
-const API_URL = "https://movie-review-app.onrender.com/api/v1/reviews"
+const API_URL = import.meta.env.VITE_API_URL;
 
 const formSection = document.getElementById("form-section");
 const reviewsSection = document.getElementById("reviews-section");
@@ -35,53 +35,37 @@ function createNewReviewForm() {
 
 
 // Load Reviews
-function returnReviews(url) {
-    reviewsSection.innerHTML = ""; 
-    
-    if (!formSection.hasChildNodes()) {
-        formSection.appendChild(createNewReviewForm());
+async function returnReviews(movieId) {
+    try {
+        const res = await fetch(`${API_URL}/movie/${movieId}`, {
+            cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        console.log("Fetched Reviews:", data);
+
+        reviewsSection.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            reviewsSection.innerHTML = "<h3>No reviews yet</h3>";
+            return;
+        }
+
+        data.forEach(review => {
+            const div = document.createElement("div");
+
+            div.innerHTML = `
+                <p><strong>Review:</strong> ${review.review}</p>
+                <p><strong>User:</strong> ${review.user}</p>
+            `;
+
+            reviewsSection.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error("Error fetching reviews:", err);
     }
-
-    fetch(url + "/movie/" + movieId, { cache: "no-store" })
-        .then(res => res.json())
-        .then(data => {
-            console.log("Fetched Reviews:", data);
-
-            if (!data || data.length === 0) {
-                const msg = document.createElement("h3");
-                msg.innerText = "No reviews yet";
-                reviewsSection.appendChild(msg);
-                return;
-            }
-
-            data.forEach(review => {
-                const div_card = document.createElement('div');
-                div_card.innerHTML = `
-                    <div class="row">
-                        <div class="column">
-                            <div class="card" id="${review._id}">
-                                <p><strong>Review: </strong>${review.review}</p>
-                                <p><strong>User: </strong>${review.user}</p>
-                                <button
-                                    class="edit-btn"
-                                    data-id="${review._id}"
-                                    data-review="${review.review.replace(/"/g, '&quot;')}"
-                                    data-user="${review.user}">
-                                    Edit
-                                </button>
-                                <button onclick="deleteReview('${review._id}')">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                reviewsSection.appendChild(div_card);
-
-                div_card.querySelector(".edit-btn").addEventListener("click", function() {
-                    editReview(this.dataset.id, this.dataset.review, this.dataset.user);
-                });
-            });
-        })
-        .catch(err => console.error("Error fetching reviews:", err));
 }
 
 

@@ -15,22 +15,19 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-  app.use(cors()); // will restrict later if needed
-  app.use(express.json());
+  app.use(cors({
+    origin: "*"
+}));
 
 const mongoURI = process.env.DATABASE_URL;
 
 // CONNECTION
-mongoose.connect(mongoURI)
-  .then(async (conn) => {
-    console.log("Database connected");
-
-    await ReviewsDAO.injectDB(conn);
-  })
-  .catch(err => console.error("DB connection error:", err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error("MongoDB connection error:", err));
 
 // ROUTES
-app.use("/api/v1/reviews", reviews);
+app.use("/api/v1/reviews", reviewsRouter);
 
 app.get("/api", (req, res) => {
   res.send("API is working ");
