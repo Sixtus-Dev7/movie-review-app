@@ -2,7 +2,7 @@ const url = new URL(location.href);
 const movieId = url.searchParams.get("id");
 const movieTitle = url.searchParams.get("title");
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://movie-review-app.onrender.com/api/v1/reviews";
 
 const formSection = document.getElementById("form-section");
 const reviewsSection = document.getElementById("reviews-section");
@@ -11,7 +11,7 @@ const title = document.getElementById("title");
 title.innerText = movieTitle || "Movie Title";
 
 
-// Create New Review Formcon
+// Create New Review Form
 function createNewReviewForm() {
     const div = document.createElement('div');
     div.innerHTML = `
@@ -35,37 +35,40 @@ function createNewReviewForm() {
 
 
 // Load Reviews
-async function returnReviews(movieId) {
-    try {
-        const res = await fetch(`${API_URL}/movie/${movieId}`, {
-            cache: "no-store"
-        });
 
-        const data = await res.json();
-
-        console.log("Fetched Reviews:", data);
-
-        reviewsSection.innerHTML = "";
-
-        if (!data || data.length === 0) {
-            reviewsSection.innerHTML = "<h3>No reviews yet</h3>";
-            return;
-        }
-
-        data.forEach(review => {
-            const div = document.createElement("div");
-
-            div.innerHTML = `
-                <p><strong>Review:</strong> ${review.review}</p>
-                <p><strong>User:</strong> ${review.user}</p>
-            `;
-
-            reviewsSection.appendChild(div);
-        });
-
-    } catch (err) {
-        console.error("Error fetching reviews:", err);
+async function returnReviews() {
+  try {
+    const res = await fetch(`https://movie-review-app.onrender.com/api/v1/reviews/movie/${movieId}`);
+    if (!res.ok) {
+      throw new Error("Failed to fetch reviews");
     }
+
+    const data = await res.json();
+    console.log("Reviews:", data);
+
+    reviewsSection.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      reviewsSection.innerHTML = "<h3>No reviews yet</h3>";
+      return;
+    }
+
+    data.forEach(review => {
+      const div = document.createElement("div");
+      div.classList.add("review-card");
+
+      div.innerHTML = `
+        <p><strong>User:</strong> ${review.user}</p>
+        <p><strong>Review:</strong> ${review.review}</p>
+      `;
+
+      reviewsSection.appendChild(div);
+    });
+
+  } catch (err) {
+    console.error("Fetch error:", err);
+    reviewsSection.innerHTML = "<h3>Error loading reviews</h3>";
+  }
 }
 
 
@@ -88,41 +91,33 @@ function editReview(id, review, user) {
 
 
 // Save Review (POST / PUT)
-function saveReview(reviewInputId, userInputId, id = "") {
-    const reviewEl = document.getElementById(reviewInputId);
-    const userEl = document.getElementById(userInputId);
 
-    if (!reviewEl || !userEl) {
-        console.error("Input elements not found");
-        return;
-    }
 
-    const review = reviewEl.value.trim();
-    const user = userEl.value.trim();
+async function saveReview() {
+  const user = document.getElementById("user").value;
+  const review = document.getElementById("review").value;
 
-    if (!review || !user) {
-        alert("Both fields are required!");
-        return;
-    }
+  if (!user || !review) {
+    alert("Fill all fields");
+    return;
+  }
 
-    const url = id ? API_URL + "/" + id : API_URL + "/new";
-    const method = id ? "PUT" : "POST";
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ movieId, user, review })
+    });
 
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ user, review, movieId })
-    })
-    .then(res => res.json())
-    .then(res => {
-        console.log("Saved:", res);
-        returnReviews(API_URL); 
-    })
-    .catch(err => console.error("Error saving review:", err));
+    const data = await res.json();
+    console.log("Saved:", data);
+
+    returnReviews();
+
+  } catch (err) {
+    console.error("Save error:", err);
+  }
 }
-
 
 // Delete Review
 function deleteReview(id) {
